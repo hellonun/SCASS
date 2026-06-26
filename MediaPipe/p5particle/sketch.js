@@ -25,16 +25,23 @@ let handData = {
 
 let socket;
 
+let viewID = "view1";
+
 function setupWebSocket() {
   socket = new WebSocket("ws://localhost:8000");
 
   socket.onopen = function () {
     console.log("Connected to TouchDesigner WebSocket");
-    socket.send("hello from p5");
   };
+
   socket.onmessage = function (event) {
     try {
-      handData = JSON.parse(event.data);
+      let data = JSON.parse(event.data);
+
+      if (data[viewID]) {
+        handData.hands = data[viewID];
+      }
+
     } catch (e) {
       console.log("Bad WebSocket data", event.data);
     }
@@ -60,10 +67,17 @@ function setup() {
   pixelDensity(1);
   frameRate(60);
 
+  let params = getURLParams();
+
+  if (params.view === "2") {
+    viewID = "view2";
+  } else {
+    viewID = "view1";
+  }
+
   setupWebSocket();
 
   createLogoGrid();
-
 }
 
 function draw() {
